@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mission Histoire 6e</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #166534; --green-bg: #DCFCE7; --green-bd: #22C55E;
+  --blue: #1E3A8A; --blue-bg: #EFF6FF; --blue-bd: #3B82F6;
+  --red: #991B1B; --red-bg: #FEF2F2; --red-bd: #EF4444;
+  --amber: #92400E; --amber-bg: #FEF3E2; --amber-bd: #F59E0B;
+  --slate: #1E293B; --slate-mid: #475569; --slate-light: #94A3B8;
+  --bg: #F8FAFC; --card: #FFFFFF; --border: #E2E8F0;
+  --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --accent: #1E3A8A; --accent-dark: #1e2e6b; --accent-light: #EFF6FF;
+}
+body { font-family: system-ui,-apple-system,'Segoe UI',sans-serif; background:var(--bg); color:var(--slate); min-height:100vh; font-size:15px; line-height:1.5; }
+
+.header { background:#1E3A8A; color:white; padding:12px 16px; position:sticky; top:0; z-index:100; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.header-title { font-weight:700; font-size:15px; }
+.header-sub { font-size:11px; color:#93C5FD; }
+.score-pill { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:white; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:700; white-space:nowrap; }
+
+main { max-width:480px; margin:0 auto; padding:16px; }
+.screen { display:none; }
+.screen.active { display:block; }
+
+.home-hero { background:linear-gradient(135deg,#1E3A8A,#3B82F6); color:white; border-radius:var(--radius); padding:20px; margin-bottom:16px; }
+.home-hero h2 { font-size:18px; font-weight:700; margin-bottom:4px; }
+.home-hero p { font-size:13px; color:rgba(255,255,255,0.85); }
+.home-xp { margin-top:12px; }
+.home-xp-label { font-size:11px; color:rgba(255,255,255,0.7); margin-bottom:4px; display:flex; justify-content:space-between; }
+.home-xp-bar { height:6px; background:rgba(255,255,255,0.2); border-radius:3px; }
+.home-xp-fill { height:100%; background:white; border-radius:3px; transition:width 0.6s ease; }
+
+.chapter-card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:16px; margin-bottom:12px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); }
+.chap-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; background:var(--accent-light); }
+.chap-info { flex:1; min-width:0; }
+.chap-status { font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:2px; color:var(--accent); }
+.chap-title { font-size:14px; font-weight:700; }
+.chap-sub { font-size:12px; color:var(--slate-mid); margin-top:1px; }
+.chap-progress { margin-top:6px; height:4px; background:#E2E8F0; border-radius:2px; }
+.chap-progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.4s; }
+
+.btn { border:none; padding:9px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.btn:active { transform:scale(0.96); }
+.btn-blue { background:var(--blue-bg); color:var(--blue); border:1px solid var(--blue-bd); }
+.btn-slate { background:#E2E8F0; color:var(--slate-mid); border:1px solid #CBD5E1; }
+.btn-primary { background:#3B82F6; color:white; border:none; }
+.btn-primary:hover { background:#2563EB; }
+.btn-green { background:var(--green-bg); color:var(--green); border:1px solid var(--green-bd); }
+.btn-red { background:var(--red-bg); color:var(--red); border:1px solid var(--red-bd); }
+.btn-amber { background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-bd); }
+.btn-sm { padding:6px 12px; font-size:12px; }
+
+.back-btn { display:inline-flex; align-items:center; gap:6px; color:#3B82F6; font-size:13px; font-weight:600; cursor:pointer; padding:8px 0; margin-bottom:12px; border:none; background:none; }
+
+.tab-bar { display:flex; gap:4px; margin-bottom:16px; background:#F1F5F9; border-radius:10px; padding:4px; overflow-x:auto; }
+.tab-btn { flex:1; padding:8px 4px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; border:none; background:none; color:var(--slate-mid); transition:all 0.15s; text-align:center; white-space:nowrap; min-width:48px; }
+.tab-btn.active { background:white; color:var(--slate); box-shadow:var(--shadow); }
+
+.section-card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); margin-bottom:12px; overflow:hidden; box-shadow:var(--shadow); }
+.section-header { padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; border-bottom:1px solid transparent; }
+.section-header.open { border-bottom-color:var(--border); }
+.section-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+.section-title-wrap { flex:1; }
+.section-title { font-size:14px; font-weight:700; }
+.section-sub { font-size:11px; color:var(--slate-mid); }
+.chev { color:var(--slate-light); font-size:12px; transition:transform 0.2s; display:inline-block; }
+.section-header.open .chev { transform:rotate(180deg); }
+.section-body { padding:14px 16px; display:none; }
+.section-header.open + .section-body { display:block; }
+
+.vocab-item { padding:11px 0; border-bottom:1px solid var(--border); }
+.vocab-item:last-child { border-bottom:none; padding-bottom:0; }
+.vocab-term { font-size:13px; font-weight:700; color:#1E3A8A; margin-bottom:3px; }
+.vocab-def { font-size:12px; color:var(--slate-mid); line-height:1.5; }
+
+.timeline { position:relative; padding-left:24px; }
+.timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:#E2E8F0; border-radius:1px; }
+.tl-item { position:relative; margin-bottom:14px; }
+.tl-item:last-child { margin-bottom:0; }
+.tl-dot { position:absolute; left:-20px; top:3px; width:14px; height:14px; border-radius:50%; border:2px solid white; }
+.tl-date { font-size:11px; font-weight:700; color:var(--slate-light); margin-bottom:2px; }
+.tl-event { font-size:13px; font-weight:600; }
+.tl-detail { font-size:11px; color:var(--slate-mid); margin-top:2px; line-height:1.4; }
+
+.frise-wrap { overflow-x:auto; padding-bottom:8px; }
+.frise { display:flex; gap:0; position:relative; min-width:560px; padding:40px 16px 16px; }
+.frise-line { position:absolute; top:56px; left:16px; right:16px; height:3px; background:#E2E8F0; border-radius:2px; }
+.frise-event { display:flex; flex-direction:column; align-items:center; flex:1; cursor:pointer; }
+.frise-dot { width:14px; height:14px; border-radius:50%; border:3px solid white; box-shadow:0 0 0 2px currentColor; margin-bottom:6px; transition:transform 0.2s; }
+.frise-event:hover .frise-dot { transform:scale(1.4); }
+.frise-date { font-size:9px; font-weight:700; color:var(--slate-light); text-align:center; line-height:1.2; }
+.frise-popup { background:white; border:1px solid var(--border); border-radius:10px; padding:12px; margin-top:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); font-size:12px; display:none; }
+.frise-popup.show { display:block; }
+.frise-popup h4 { font-size:13px; font-weight:700; color:#1E3A8A; margin-bottom:4px; }
+
+.card-toolbar { display:flex; gap:8px; margin-bottom:10px; align-items:center; }
+.card-toolbar label { font-size:12px; color:var(--slate-mid); display:flex; align-items:center; gap:4px; cursor:pointer; }
+.flashcard { background:white; border-radius:14px; border:1.5px solid var(--border); min-height:170px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; cursor:pointer; position:relative; box-shadow:var(--shadow); margin-bottom:12px; user-select:none; }
+.card-label { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--slate-light); margin-bottom:12px; }
+.card-front-text { font-size:18px; font-weight:800; color:var(--slate); }
+.card-back-text { font-size:12px; color:var(--slate-mid); line-height:1.5; }
+.card-hint { position:absolute; bottom:10px; font-size:11px; color:var(--slate-light); }
+.card-counter { text-align:center; color:var(--slate-mid); font-size:12px; margin-bottom:8px; }
+.card-nav { display:flex; gap:8px; margin-bottom:10px; }
+.card-nav .btn { flex:1; text-align:center; }
+.card-eval { display:none; flex-direction:column; gap:8px; }
+.card-eval.show { display:flex; }
+.card-eval-row { display:flex; gap:8px; }
+.card-eval-row .btn { flex:1; text-align:center; }
+.flip-dots { display:flex; gap:4px; justify-content:center; margin-bottom:10px; flex-wrap:wrap; }
+.flip-dot { width:6px; height:6px; border-radius:50%; background:var(--border); }
+.flip-dot.active { background:#3B82F6; }
+.flip-dot.known { background:var(--green-bd); }
+.flip-dot.review { background:var(--amber-bd); }
+.leitner-info { font-size:11px; color:var(--slate-mid); text-align:center; margin-bottom:10px; }
+.leitner-info span { font-weight:700; color:var(--amber); }
+
+.quiz-toolbar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.quiz-mode-btn { flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:1.5px solid var(--border); background:white; color:var(--slate-mid); text-align:center; transition:all 0.15s; min-width:70px; }
+.quiz-mode-btn.active { border-color:#3B82F6; background:var(--blue-bg); color:#1E3A8A; }
+
+.quiz-progress { margin-bottom:14px; }
+.prog-text { display:flex; justify-content:space-between; font-size:12px; color:var(--slate-mid); margin-bottom:6px; align-items:center; }
+.prog-bar { height:5px; background:#E2E8F0; border-radius:3px; overflow:hidden; }
+.prog-fill { height:100%; background:#3B82F6; border-radius:3px; transition:width 0.4s ease; }
+
+.timer-ring { width:36px; height:36px; flex-shrink:0; }
+.timer-circle { fill:none; stroke:#E2E8F0; stroke-width:3; }
+.timer-arc { fill:none; stroke:#3B82F6; stroke-width:3; stroke-linecap:round; stroke-dasharray:100; stroke-dashoffset:0; transition:stroke-dashoffset 1s linear, stroke 0.3s; transform:rotate(-90deg); transform-origin:50% 50%; }
+.timer-text { font-size:11px; font-weight:700; fill:var(--slate); }
+
+.streak-pill { background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-bd); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700; display:none; }
+.streak-pill.show { display:inline-flex; align-items:center; gap:3px; }
+
+.quiz-q { font-size:15px; font-weight:700; color:var(--slate); margin-bottom:14px; line-height:1.4; }
+.opt-btn { width:100%; text-align:left; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; background:white; font-size:13px; font-weight:500; cursor:pointer; margin-bottom:8px; color:var(--slate); transition:all 0.15s; line-height:1.4; display:block; }
+.opt-btn:hover:not(:disabled) { border-color:#93C5FD; background:var(--blue-bg); }
+.opt-btn.correct { background:var(--green-bg); border-color:var(--green-bd); color:var(--green); }
+.opt-btn.wrong { background:var(--red-bg); border-color:var(--red-bd); color:var(--red); }
+.opt-btn:disabled { cursor:default; }
+
+.feedback { padding:12px 14px; border-radius:10px; margin-top:4px; margin-bottom:8px; font-size:13px; font-weight:600; display:none; line-height:1.5; }
+.feedback.ok { background:var(--green-bg); color:var(--green); display:block; }
+.feedback.ko { background:var(--red-bg); color:var(--red); display:block; }
+
+.vf-btns { display:flex; gap:10px; margin-bottom:10px; }
+.vf-btn { flex:1; padding:14px; border-radius:10px; font-size:16px; font-weight:800; cursor:pointer; border:1.5px solid var(--border); background:white; transition:all 0.15s; text-align:center; }
+.vf-btn:hover:not(:disabled) { transform:scale(1.03); }
+.vf-btn.correct { background:var(--green-bg); border-color:var(--green-bd); color:var(--green); }
+.vf-btn.wrong { background:var(--red-bg); border-color:var(--red-bd); color:var(--red); }
+.vf-btn:disabled { cursor:default; }
+
+.lacune-q { font-size:14px; font-weight:600; color:var(--slate); margin-bottom:12px; line-height:1.6; }
+.lacune-input { border:1.5px solid var(--border); border-radius:8px; padding:8px 12px; font-size:14px; width:100%; margin-bottom:10px; outline:none; font-weight:600; }
+.lacune-input:focus { border-color:#3B82F6; }
+.lacune-result { padding:10px 12px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:8px; display:none; }
+.lacune-result.ok { background:var(--green-bg); color:var(--green); display:block; }
+.lacune-result.ko { background:var(--red-bg); color:var(--red); display:block; }
+
+.quiz-end { text-align:center; padding:20px 12px; }
+.big-icon { font-size:48px; margin-bottom:12px; }
+.score-display { background:var(--blue-bg); border-radius:12px; padding:12px; margin-bottom:12px; font-size:28px; font-weight:800; color:#1E3A8A; }
+.score-display span { font-size:13px; font-weight:500; display:block; color:var(--slate-mid); }
+.errors-list { text-align:left; margin-bottom:14px; }
+.errors-list h4 { font-size:13px; font-weight:700; color:var(--red); margin-bottom:8px; }
+.error-item { background:var(--red-bg); border-radius:8px; padding:10px 12px; margin-bottom:6px; font-size:12px; color:var(--slate-mid); border-left:3px solid var(--red-bd); }
+.error-item strong { color:var(--slate); display:block; margin-bottom:3px; font-size:13px; }
+
+.badges-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.badge-card { border-radius:10px; padding:14px 12px; text-align:center; border:1.5px solid; }
+.badge-card.unlocked { opacity:1; }
+.badge-card.locked-b { opacity:0.4; filter:grayscale(0.8); }
+.badge-icon { font-size:28px; margin-bottom:6px; }
+.badge-name { font-size:12px; font-weight:700; margin-bottom:3px; }
+.badge-desc { font-size:10px; color:var(--slate-mid); line-height:1.3; }
+
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:24px; }
+.modal-box { background:white; border-radius:16px; padding:24px; width:100%; max-width:360px; }
+.modal-box h3 { font-size:17px; font-weight:700; margin-bottom:8px; }
+.modal-box p { font-size:13px; color:var(--slate-mid); margin-bottom:16px; }
+.modal-input { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:8px; font-size:15px; letter-spacing:1px; font-weight:600; margin-bottom:12px; outline:none; }
+.modal-input:focus { border-color:#3B82F6; }
+.modal-actions { display:flex; gap:8px; }
+.modal-actions .btn { flex:1; text-align:center; }
+.modal-error { color:var(--red); font-size:12px; margin-bottom:10px; font-weight:600; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <div class="header-title">&#127757; Mission Histoire 6e</div>
+    <div class="header-sub">Prehistoire &mdash; Les debuts de l'humanite</div>
+  </div>
+  <div class="score-pill">&#11088; <span id="score-val">0</span> pts</div>
+</header>
+
+<main>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <h2>Chapitre 1 &mdash; Les debuts de l'humanite</h2>
+    <p>Paleolithique &amp; Neolithique. Revise le cours, entraine-toi et debloque tes badges !</p>
+    <div class="home-xp">
+      <div class="home-xp-label"><span>Ta progression</span><span id="home-xp-pct">0%</span></div>
+      <div class="home-xp-bar"><div class="home-xp-fill" id="home-xp-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="chapter-card">
+    <div class="chap-icon">&#129460;</div>
+    <div class="chap-info">
+      <div class="chap-status">&#10004; Disponible</div>
+      <div class="chap-title">Ch. 1 &mdash; Les debuts de l'humanite</div>
+      <div class="chap-sub">Paleolithique &amp; Neolithique</div>
+      <div class="chap-progress"><div class="chap-progress-fill" id="prog-ch1" style="width:0%"></div></div>
+    </div>
+    <button class="btn btn-blue" onclick="openChapter(1)">Jouer</button>
+  </div>
+</div>
+
+<!-- CHAPTER 1 -->
+<div class="screen" id="screen-ch1">
+  <button class="back-btn" onclick="goHome()">&#8592; Retour</button>
+  <div class="tab-bar">
+    <button class="tab-btn" id="tab-cours" onclick="switchTab('cours')">&#128218; Cours</button>
+    <button class="tab-btn" id="tab-frise" onclick="switchTab('frise')">&#128336; Frise</button>
+    <button class="tab-btn" id="tab-cartes" onclick="switchTab('cartes')">&#127183; Cartes</button>
+    <button class="tab-btn" id="tab-quiz" onclick="switchTab('quiz')">&#127919; Quiz</button>
+    <button class="tab-btn" id="tab-lacunes" onclick="switchTab('lacunes')">&#9997; Trous</button>
+    <button class="tab-btn" id="tab-paliers" onclick="switchTab('paliers')">&#127942; Paliers</button>
+  </div>
+
+  <!-- COURS -->
+  <div id="panel-cours" style="display:none;">
+
+    <div class="section-card">
+      <div class="section-header open" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:#EFF6FF;">&#9203;</div>
+        <div class="section-title-wrap"><div class="section-title">Frise chronologique</div><div class="section-sub">Les 5 dates cles a retenir absolument</div></div>
+        <span class="chev">&#9660;</span>
+      </div>
+      <div class="section-body" style="display:block;">
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot" style="background:#7C3AED;"></div><div class="tl-date">~ 2,8 millions d'annees</div><div class="tl-event">Apparition du genre Homo</div><div class="tl-detail">En Afrique. Les premiers etres humains fabriquent des outils et marchent debout (bipedes). Debut de la Prehistoire.</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:#B45309;"></div><div class="tl-date">~ 400 000 ans</div><div class="tl-event">Maitrise du feu par Homo erectus</div><div class="tl-detail">Cuisson des aliments, protection contre les predateurs, lumiere et chaleur. Invention fondamentale.</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:#1D4ED8;"></div><div class="tl-date">~ 300 000 ans</div><div class="tl-event">Apparition d'Homo sapiens</div><div class="tl-detail">"L'homme sage", notre espece. Seul survivant du genre Homo aujourd'hui. Invente l'art parietal.</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:#047857;"></div><div class="tl-date">~ 10 000 av. J.-C.</div><div class="tl-event">Debut du Neolithique</div><div class="tl-detail">Revolution : naissance de l'agriculture et de l'elevage. Fin du nomadisme. Premiers villages sedentaires.</div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:#B91C1C;"></div><div class="tl-date">~ 3 300 av. J.-C.</div><div class="tl-event">Invention de l'ecriture</div><div class="tl-detail">Fin de la Prehistoire, debut de l'Histoire. Passage au chapitre suivant !</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:#FEF3E2;">&#128293;</div>
+        <div class="section-title-wrap"><div class="section-title">Le Paleolithique</div><div class="section-sub">Age de la pierre taillee - nomadisme</div></div>
+        <span class="chev">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <div class="vocab-item"><div class="vocab-term">&#127758; Le berceau de l'humanite</div><div class="vocab-def">L'Afrique est le continent ou sont apparus les premiers humains (genre Homo, ~2,8 Ma). C'est depuis l'Afrique qu'Homo erectus puis Homo sapiens ont migre pour peupler toute la Terre.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#128694; Le nomadisme</div><div class="vocab-def">Les humains du Paleolithique sont des nomades : ils se deplacent en groupes (clans) pour suivre les troupeaux (rennes, mammouths) et les saisons. Habitat : entree de grottes ou tentes en peaux de betes.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#127837; La predation : chasse, peche, cueillette</div><div class="vocab-def">Les hommes prelevaient la nourriture dans la nature sans la produire. C'est la predation, opposee a la production (agriculture) qui apparait au Neolithique.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#129693; Le biface et la pierre taillee</div><div class="vocab-def">L'outil emblematique du Paleolithique : une pierre (silex) taillee sur deux faces pour couper, racler ou gratter. Ils utilisent aussi os et bois d'animaux (aiguilles, harpons).</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#127912; L'art parietal</div><div class="vocab-def">Peintures et gravures sur les parois des grottes, realisees par Homo sapiens. Representent presque toujours des animaux. A connaitre : Grotte de Lascaux (Dordogne) et Grotte Chauvet (Ardeche, ~36 000 ans).</div></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:#DCFCE7;">&#127806;</div>
+        <div class="section-title-wrap"><div class="section-title">Le Neolithique</div><div class="section-sub">Age de la pierre polie - sedentarisation</div></div>
+        <span class="chev">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <div class="vocab-item"><div class="vocab-term">&#127769; Le Croissant Fertile</div><div class="vocab-def">Zone du Moyen-Orient (Irak, Syrie, Egypte) ou l'agriculture est inventee en premier, vers -10 000. Climat favorable et grands fleuves : Tigre, Euphrate, Nil.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#127968; La sedentarisation et les premiers villages</div><div class="vocab-def">Avec l'agriculture, les hommes s'installent de facon permanente. Naissance des premiers villages (maisons en brique ou en bois). Exemple du programme : Catal Hoyuk (Turquie, ~7 000 av. J.-C.).</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#127806; L'agriculture</div><div class="vocab-def">L'homme seme et recolte. Premieres cereales : ble et orge. Premieres legumineuses : lentilles, pois. Economie de production remplacant la predation.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#128017; La domestication (elevage)</div><div class="vocab-def">Le chien est le premier animal domestique (des le Paleolithique). Au Neolithique : moutons, chevres, boeufs, porcs - pour la viande, le lait, la laine et la force de travail.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#129683; La pierre polie et la hache</div><div class="vocab-def">Outil plus resistant que la pierre taillee. Les haches en pierre polie permettent de couper les arbres (defrichage) pour creer des champs.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#129748; La poterie (ceramique)</div><div class="vocab-def">Inventee au Neolithique. Permet de cuire les aliments et surtout de stocker les surplus de recoltes a l'abri des rongeurs et de l'humidite.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#129525; Le tissage</div><div class="vocab-def">Fabrication des premiers vetements en laine ou en lin - fin des simples peaux de betes brutes.</div></div>
+        <div class="vocab-item"><div class="vocab-term">&#128511; Les megalithes (dolmens, menhirs)</div><div class="vocab-def">Grands monuments de pierre. Dolmen = tombe collective. Menhir = pierre dressee. Prouvent une organisation collective et des croyances religieuses elaborees.</div></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon" style="background:#F5F3FF;">&#129516;</div>
+        <div class="section-title-wrap"><div class="section-title">Les especes du genre Homo</div><div class="section-sub">Evolution et differences a connaitre</div></div>
+        <span class="chev">&#9660;</span>
+      </div>
+      <div class="section-body">
+        <div class="vocab-item"><div class="vocab-term">Genre Homo (2,8 millions d'annees)</div><div class="vocab-def">Se distingue des grands singes par la bipédie (marche debout) et la fabrication d'outils. Apparu en Afrique.</div></div>
+        <div class="vocab-item"><div class="vocab-term">Homo erectus (~1,8 million d'annees)</div><div class="vocab-def">Premier a maitriser le feu (~400 000 ans) et a migrer hors d'Afrique vers l'Europe et l'Asie.</div></div>
+        <div class="vocab-item"><div class="vocab-term">Homo sapiens (~300 000 ans)</div><div class="vocab-def">"L'homme sage" : notre espece. Seul survivant du genre Homo aujourd'hui. Invente l'art parietal et se repand sur toute la planete.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRISE -->
+  <div id="panel-frise" style="display:none;">
+    <div style="font-size:13px;color:var(--slate-mid);margin-bottom:12px;">Appuyez sur un point pour voir l'evenement.</div>
+    <div class="section-card" style="padding:16px;">
+      <div class="frise-wrap">
+        <div class="frise" id="frise-container"><div class="frise-line"></div></div>
+      </div>
+      <div id="frise-detail" class="frise-popup" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- CARTES -->
+  <div id="panel-cartes" style="display:none;">
+    <div class="card-toolbar">
+      <label><input type="checkbox" id="chk-random" onchange="toggleRandomCards()"> Ordre aleatoire</label>
+      <span style="flex:1;"></span>
+    </div>
+    <div class="leitner-info" id="leitner-info"></div>
+    <div class="flip-dots" id="flip-dots"></div>
+    <div class="card-counter" id="card-counter"></div>
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="card-label" id="card-side-label">Terme</div>
+      <div id="card-content" class="card-front-text"></div>
+      <div class="card-hint" id="card-hint">Appuyer pour retourner</div>
+    </div>
+    <div class="card-eval" id="card-eval">
+      <div style="font-size:12px;font-weight:600;color:var(--slate-mid);text-align:center;">Tu savais ?</div>
+      <div class="card-eval-row">
+        <button class="btn btn-red btn-sm" onclick="rateCard(false)">&#10060; A revoir</button>
+        <button class="btn btn-green btn-sm" onclick="rateCard(true)">&#10003; Je savais</button>
+      </div>
+    </div>
+    <div class="card-nav">
+      <button class="btn btn-slate" onclick="prevCard()">&#8592; Precedent</button>
+      <button class="btn btn-primary" onclick="nextCard()">Suivant &#8594;</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="panel-quiz" style="display:none;">
+    <div id="quiz-mode-select" class="section-card" style="padding:16px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Choisissez votre mode :</div>
+      <div class="quiz-toolbar">
+        <div class="quiz-mode-btn active" id="mode-normal" onclick="setQuizMode('normal')">&#128218;<br>Normal</div>
+        <div class="quiz-mode-btn" id="mode-brevet" onclick="setQuizMode('brevet')">&#9201;<br>Controle<br><small>30s/q</small></div>
+        <div class="quiz-mode-btn" id="mode-erreurs" onclick="setQuizMode('erreurs')">&#10060;<br>Erreurs</div>
+        <div class="quiz-mode-btn" id="mode-vf" onclick="setQuizMode('vf')">&#10067;<br>Vrai/Faux</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="startQuiz()">Lancer &#9654;</button>
+    </div>
+    <div id="quiz-play" style="display:none;">
+      <div class="section-card" style="padding:16px;">
+        <div class="quiz-progress">
+          <div class="prog-text">
+            <span id="q-counter">Question 1 / 15</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="streak-pill" id="streak-pill">&#128293; x<span id="streak-val">0</span></span>
+              <span id="q-score-mini">0 pts</span>
+              <svg class="timer-ring" id="timer-svg" viewBox="0 0 36 36" style="display:none;">
+                <circle class="timer-circle" cx="18" cy="18" r="15.9"/>
+                <circle class="timer-arc" id="timer-arc" cx="18" cy="18" r="15.9" style="stroke-dasharray:100 100;"/>
+                <text class="timer-text" x="18" y="22" text-anchor="middle" id="timer-txt">30</text>
+              </svg>
+            </div>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" id="q-progress" style="width:0%;"></div></div>
+        </div>
+        <div id="quiz-main">
+          <p class="quiz-q" id="quiz-q-text"></p>
+          <div id="quiz-opts"></div>
+          <div id="vf-zone" style="display:none;">
+            <div class="vf-btns">
+              <button class="vf-btn" id="vf-true" onclick="answerVF(true)">&#10003; VRAI</button>
+              <button class="vf-btn" id="vf-false" onclick="answerVF(false)">&#10005; FAUX</button>
+            </div>
+          </div>
+          <div class="feedback" id="quiz-feedback"></div>
+          <button class="btn btn-primary" id="quiz-next-btn" onclick="nextQuestion()" style="display:none;width:100%;margin-top:8px;">Suivant &#8594;</button>
+        </div>
+        <div id="quiz-end-screen" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TROUS -->
+  <div id="panel-lacunes" style="display:none;">
+    <div class="section-card" style="padding:16px;">
+      <div class="quiz-progress">
+        <div class="prog-text"><span id="lac-counter">Exercice 1 / 10</span><span id="lac-score">0 pts</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="lac-progress" style="width:0%;"></div></div>
+      </div>
+      <div id="lacune-main">
+        <p class="lacune-q" id="lac-q"></p>
+        <input type="text" class="lacune-input" id="lac-input" placeholder="Votre reponse..." autocomplete="off">
+        <div class="lacune-result" id="lac-result"></div>
+        <button class="btn btn-primary" id="lac-check-btn" onclick="checkLacune()" style="width:100%;margin-bottom:8px;">Verifier &#10003;</button>
+        <button class="btn btn-slate" id="lac-next-btn" onclick="nextLacune()" style="width:100%;display:none;">Suivant &#8594;</button>
+      </div>
+      <div id="lacune-end" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- PALIERS -->
+  <div id="panel-paliers" style="display:none;">
+    <div style="font-size:13px;color:var(--slate-mid);margin-bottom:14px;">Debloque des badges en progressant dans le quiz !</div>
+    <div class="badges-grid" id="badges-grid"></div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" style="width:100%;" onclick="printCert()" id="cert-btn" disabled>&#127942; Imprimer mon certificat</button>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<script>
+// ===== DATA =====
+var flashcards = [
+  {term:'Nomade', def:'Personne qui se deplace constamment pour se nourrir (chasse, cueillette). Aucun habitat fixe. Mode de vie du Paleolithique.'},
+  {term:'Sedentaire', def:'Personne installee durablement dans un habitat fixe. Apparait au Neolithique avec l\'agriculture et les premiers villages.'},
+  {term:'Paleolithique', def:'Age de la "pierre taillee" (de -2,8 millions d\'annees a -10 000 av. J.-C.). Nomadisme, chasse, cueillette, biface, art parietal.'},
+  {term:'Neolithique', def:'Age de la "pierre polie" (de -10 000 a -3 300 av. J.-C.). Agriculture, elevage, villages, poterie, tissage.'},
+  {term:'Biface', def:'Outil en silex taille sur deux faces, typique du Paleolithique. Sert a couper, racler, gratter.'},
+  {term:'Homo sapiens', def:'"L\'homme sage". Notre espece, apparue il y a ~300 000 ans. Invente l\'art parietal. Seul survivant du genre Homo.'},
+  {term:'Homo erectus', def:'Espece humaine ancienne (~1,8 Ma). Premier a maitriser le feu (~400 000 ans) et a migrer hors d\'Afrique.'},
+  {term:'Art parietal', def:'Peintures et gravures sur parois de grottes (Lascaux, Chauvet). Realisees par Homo sapiens. Representent surtout des animaux.'},
+  {term:'Croissant Fertile', def:'Zone du Moyen-Orient (Irak, Syrie, Egypte) ou l\'agriculture nait vers -10 000. Arrosee par Tigre, Euphrate et Nil.'},
+  {term:'Catal Hoyuk', def:'Village neolithique de Turquie (~7 000 av. J.-C.). Exemple cle : l\'un des premiers villages sedentaires permanents.'},
+  {term:'Poterie', def:'Invention du Neolithique. Permet de cuire et surtout de stocker les surplus de recoltes a l\'abri des rongeurs.'},
+  {term:'Dolmen', def:'Tombe collective en grandes pierres, erigee au Neolithique. Prouve organisation collective et croyances religieuses.'},
+  {term:'Domestication', def:'Apprivoiser des animaux sauvages pour les elever. Le chien est le premier (Paleolithique), puis moutons, boeufs, chevres (Neolithique).'},
+  {term:'Predation', def:'Prelever la nourriture dans la nature (chasse, peche, cueillette) sans la produire. Mode de vie du Paleolithique.'},
+  {term:'Prehistoire', def:'Periode avant l\'invention de l\'ecriture (~3 300 av. J.-C.). Comprend Paleolithique et Neolithique.'},
+  {term:'Menhir', def:'Pierre dressee verticalement, erigee au Neolithique. Exemple celebre : Carnac (Bretagne). Signification religieuse probable.'},
+  {term:'Lascaux', def:'Grotte ornee de peintures rupestres (Dordogne, France). Decouverte en 1940. Datee d\'environ 17 000 ans. Realisee par Homo sapiens.'}
+];
+
+var quizData = [
+  {q:'Quel continent est le berceau de l\'humanite, ou sont apparus les premiers humains ?', opts:['L\'Europe','L\'Afrique','L\'Asie','L\'Amerique'], a:1, expl:'L\'Afrique ! C\'est la qu\'est apparu le genre Homo il y a environ 2,8 millions d\'annees.'},
+  {q:'Quelle espece humaine est la notre, apparue il y a ~300 000 ans ?', opts:['Homo habilis','Homo heidelbergensis','Homo sapiens','Homo erectus'], a:2, expl:'Homo sapiens ("l\'homme sage"). C\'est la seule espece humaine encore vivante aujourd\'hui.'},
+  {q:'Comment appelle-t-on une personne qui se deplace sans cesse pour se nourrir ?', opts:['Sedentaire','Agriculteur','Nomade','Chasseur'], a:2, expl:'Un nomade ! C\'est le mode de vie du Paleolithique : on suit les troupeaux et les saisons.'},
+  {q:'Quel est l\'outil emblematique du Paleolithique, taille sur deux faces ?', opts:['La hache polie','Le biface','La poterie','Le menhir'], a:1, expl:'Le biface ! Une pierre (silex) taillee sur deux faces. Outil polyvalent : couper, racler, gratter.'},
+  {q:'Quelle decouverte majeure est realisee vers -400 000 ans par Homo erectus ?', opts:['L\'agriculture','L\'ecriture','La maitrise du feu','La poterie'], a:2, expl:'La maitrise du feu ! Cuisiner, se chauffer, se proteger des predateurs et voir la nuit.'},
+  {q:'Dans quelle region du monde l\'agriculture nait-elle vers -10 000 av. J.-C. ?', opts:['L\'Europe de l\'Ouest','Le Croissant Fertile','L\'Inde','L\'Afrique du Sud'], a:1, expl:'Le Croissant Fertile (Moyen-Orient : Irak, Syrie, Egypte). Climat favorable et grands fleuves.'},
+  {q:'Qu\'est-ce que la sedentarisation, qui apparait au Neolithique ?', opts:['Se deplacer en groupe','S\'installer durablement dans un habitat fixe','Pratiquer la chasse','Tailler des pierres'], a:1, expl:'La sedentarisation : les hommes s\'installent dans des habitats permanents - naissance des premiers villages !'},
+  {q:'Quelles sont les deux grandes nouveautes economiques du Neolithique ?', opts:['La chasse et la peche','Le commerce et l\'ecriture','L\'agriculture et l\'elevage','La taille de pierre et le feu'], a:2, expl:'L\'agriculture (ble, orge) et l\'elevage (moutons, boeufs). On passe de predateur a producteur !'},
+  {q:'A quoi sert principalement la poterie, inventee au Neolithique ?', opts:['A fabriquer des armes','A construire des maisons','A stocker les recoltes','A naviguer sur les fleuves'], a:2, expl:'La poterie sert surtout a stocker les surplus de cereales a l\'abri des rongeurs.'},
+  {q:'Qu\'est-ce qu\'un dolmen, apparu au Neolithique ?', opts:['Un outil pour broyer le grain','Une tombe collective en grandes pierres','Un type de maison en bois','Un bateau primitif'], a:1, expl:'Un dolmen est une tombe collective en grandes pierres. Il prouve une organisation collective et des croyances religieuses.'},
+  {q:'Dans quelles grottes a-t-on retrouve de celebres peintures rupestres en France ?', opts:['Versailles et Fontainebleau','Lascaux et Chauvet','Carnac et Stonehenge','Lyon et Bordeaux'], a:1, expl:'Lascaux (Dordogne) et Chauvet (Ardeche) ! Peintures d\'animaux vieilles de dizaines de milliers d\'annees.'},
+  {q:'Quel est l\'animal considere comme le premier a avoir ete domestique ?', opts:['Le mouton','Le boeuf','Le chat','Le chien'], a:3, expl:'Le chien ! Domestique des le Paleolithique pour aider a la chasse. Les animaux de ferme arrivent au Neolithique.'},
+  {q:'Que marque l\'invention de l\'ecriture vers -3 300 av. J.-C. ?', opts:['La fin du Neolithique seulement','La fin de la Prehistoire et le debut de l\'Histoire','Le debut du Paleolithique','La disparition de l\'Homo sapiens'], a:1, expl:'L\'ecriture marque la FIN de la Prehistoire et le DEBUT de l\'Histoire - la rupture majeure du programme !'},
+  {q:'Catal Hoyuk (Turquie) est un exemple celebre de quoi dans le programme ?', opts:['D\'une grotte ornee','D\'un des premiers villages neolithiques','D\'une tombe megalithique','D\'un campement paleolithique'], a:1, expl:'Catal Hoyuk est un exemple-cle : l\'un des premiers grands villages sedentaires du Neolithique (~7 000 av. J.-C.) !'},
+  {q:'Quel outil nouveau apparu au Neolithique permettait de couper les arbres pour defricher ?', opts:['Le biface en silex','La lance en os','La hache en pierre polie','La faucille en bronze'], a:2, expl:'La hache en pierre polie ! Beaucoup plus solide, elle permet de couper des arbres et d\'ouvrir des clairieres pour cultiver.'}
+];
+
+var vfData = [
+  {q:'Le Paleolithique est l\'age de la pierre polie.', ans:false, expl:'Faux. Le Paleolithique est l\'age de la PIERRE TAILLEE. C\'est le Neolithique qui est l\'age de la pierre polie.'},
+  {q:'L\'Afrique est le berceau de l\'humanite.', ans:true, expl:'Vrai. C\'est en Afrique qu\'est apparu le genre Homo il y a environ 2,8 millions d\'annees.'},
+  {q:'Au Paleolithique, les hommes vivaient dans des villages permanents.', ans:false, expl:'Faux. Au Paleolithique, les hommes sont nomades. Ce sont les villages permanents qui apparaissent au Neolithique.'},
+  {q:'Homo sapiens est notre espece, apparue il y a environ 300 000 ans.', ans:true, expl:'Vrai. Homo sapiens ("l\'homme sage") est bien notre espece, la seule encore vivante du genre Homo.'},
+  {q:'La poterie est une invention du Paleolithique.', ans:false, expl:'Faux. La poterie est une invention du NEOLITHIQUE. Elle sert notamment a stocker les surplus de recoltes.'},
+  {q:'Le Croissant Fertile est la region ou l\'agriculture est nee vers -10 000.', ans:true, expl:'Vrai. Le Croissant Fertile (Moyen-Orient : Irak, Syrie, Egypte) est bien le berceau de l\'agriculture.'},
+  {q:'Un dolmen est une pierre dressee verticalement.', ans:false, expl:'Faux. Un dolmen est une TOMBE COLLECTIVE en grandes pierres. C\'est le MENHIR qui est une pierre dressee verticalement.'},
+  {q:'Lascaux est une grotte ornee de peintures rupestres situee en France.', ans:true, expl:'Vrai. La grotte de Lascaux est en Dordogne (France). Ses peintures datent d\'environ 17 000 ans.'},
+  {q:'L\'invention de l\'ecriture marque la fin de la Prehistoire.', ans:true, expl:'Vrai. L\'invention de l\'ecriture vers -3 300 av. J.-C. marque la fin de la Prehistoire et le debut de l\'Histoire.'},
+  {q:'Le chien est le premier animal domestique, des le Paleolithique.', ans:true, expl:'Vrai. Le chien est domestique des le Paleolithique pour aider a la chasse. Les autres animaux de ferme (moutons, boeufs) arrivent au Neolithique.'}
+];
+
+var lacunesData = [
+  {q:'Au Paleolithique, les humains sont des _____ : ils se deplacent pour suivre les troupeaux et trouver leur nourriture.', ans:'nomades', display:'nomades', expl:'Le nomadisme est le mode de vie caracteristique du Paleolithique. Les hommes n\'ont pas d\'habitat fixe.'},
+  {q:'L\'outil typique du Paleolithique est le _____ : une pierre taillee sur deux faces.', ans:'biface', display:'biface', expl:'Le biface est l\'outil emblematique du Paleolithique. Taille dans du silex, il sert a couper, racler et gratter.'},
+  {q:'Les peintures et gravures sur les parois des grottes s\'appellent l\'art _____.', ans:'parietal', display:'parietal', expl:'L\'art parietal est realise par Homo sapiens dans des grottes comme Lascaux et Chauvet. Il represente surtout des animaux.'},
+  {q:'L\'agriculture nait vers -10 000 dans le _____ Fertile, au Moyen-Orient.', ans:'croissant', display:'Croissant', expl:'Le Croissant Fertile (Irak, Syrie, Egypte) est la zone ou l\'agriculture est inventee en premier, grace au climat et aux grands fleuves.'},
+  {q:'Avec l\'agriculture, les hommes deviennent _____ : ils s\'installent de facon permanente dans des villages.', ans:'sedentaires', display:'sedentaires', expl:'La sedentarisation est le grand changement du Neolithique : les hommes cessent de se deplacer et construisent des villages.'},
+  {q:'La _____ est une invention du Neolithique qui permet de stocker les surplus de cereales.', ans:'poterie', display:'poterie', expl:'La poterie (ceramique) permet de conserver les recoltes a l\'abri des rongeurs et de l\'humidite. Elle est indispensable a la vie sedentaire.'},
+  {q:'Un _____ est une tombe collective en grandes pierres, erigee au Neolithique.', ans:'dolmen', display:'dolmen', expl:'Le dolmen est un monument megalithique. Il prouve une organisation collective et des croyances religieuses elaborees au Neolithique.'},
+  {q:'L\'invention de l\'_____ vers -3 300 av. J.-C. marque la fin de la Prehistoire.', ans:'ecriture', display:'ecriture', expl:'L\'invention de l\'ecriture est la frontiere entre Prehistoire et Histoire. Sans ecriture = Prehistoire. Avec ecriture = Histoire.'},
+  {q:'_____ est l\'espece humaine a laquelle nous appartenons, apparue il y a ~300 000 ans.', ans:'homo sapiens', display:'Homo sapiens', expl:'Homo sapiens ("l\'homme sage") est notre espece. C\'est le seul representant encore vivant du genre Homo.'},
+  {q:'Catal Hoyuk, en _____, est un exemple de premier village neolithique sedentaire.', ans:'turquie', display:'Turquie', expl:'Catal Hoyuk (Turquie, ~7 000 av. J.-C.) est l\'exemple de village neolithique cite dans le programme.'}
+];
+
+var friseData = [
+  {date:'~2,8 Ma', label:'Genre Homo', color:'#7C3AED', event:'Apparition du genre Homo', detail:'En Afrique. Les premiers humains fabriquent des outils et marchent debout. Debut du Paleolithique.'},
+  {date:'~400 000 ans', label:'Feu', color:'#B45309', event:'Maitrise du feu', detail:'Par Homo erectus. Permet de cuisiner, se chauffer, se proteger des predateurs et voir la nuit.'},
+  {date:'~300 000 ans', label:'Homo sapiens', color:'#1D4ED8', event:'Apparition d\'Homo sapiens', detail:'"L\'homme sage", notre espece. Seul survivant du genre Homo. Invente l\'art parietal.'},
+  {date:'~36 000 ans', label:'Chauvet', color:'#0369A1', event:'Grotte Chauvet', detail:'L\'une des plus anciennes grottes ornees connues (Ardeche, France). Peintures d\'animaux realisees par Homo sapiens.'},
+  {date:'~17 000 ans', label:'Lascaux', color:'#047857', event:'Grotte de Lascaux', detail:'Celebre grotte ornee en Dordogne (France). Decouverte en 1940. Peintures d\'animaux (chevaux, bisons, aurochs).'},
+  {date:'~10 000 av. J.-C.', label:'Neolithique', color:'#166534', event:'Debut du Neolithique', detail:'Revolution : naissance de l\'agriculture et de l\'elevage au Croissant Fertile. Fin du nomadisme.'},
+  {date:'~7 000 av. J.-C.', label:'Catal Hoyuk', color:'#B45309', event:'Village de Catal Hoyuk', detail:'L\'un des premiers grands villages sedentaires (Turquie). Maisons en brique, agriculture, elevage.'},
+  {date:'~3 300 av. J.-C.', label:'Ecriture', color:'#B91C1C', event:'Invention de l\'ecriture', detail:'Fin de la Prehistoire, debut de l\'Histoire. L\'ecriture est inventee en Mesopotamie (Sumeriens).'}
+];
+
+var badgesConfig = [
+  {icon:'&#129460;', name:'Nomade', desc:'2 bonnes reponses', color:'#FEF3E2', border:'#F59E0B', text:'#92400E', min:2},
+  {icon:'&#129693;', name:'Tailleur de silex', desc:'4 bonnes reponses', color:'#FFF7ED', border:'#F97316', text:'#7C2D12', min:4},
+  {icon:'&#127806;', name:'Premier paysan', desc:'7 bonnes reponses', color:'#DCFCE7', border:'#22C55E', text:'#14532D', min:7},
+  {icon:'&#127968;', name:'Villageois', desc:'10 bonnes reponses', color:'#EFF6FF', border:'#3B82F6', text:'#1E3A8A', min:10},
+  {icon:'&#128221;', name:'Apprenti historien', desc:'12 bonnes reponses', color:'#F5F3FF', border:'#8B5CF6', text:'#3B0764', min:12},
+  {icon:'&#127942;', name:'Expert Prehistoire', desc:'14 bonnes reponses ou plus', color:'#FEF9C3', border:'#EAB308', text:'#713F12', min:14}
+];
+
+// ===== STATE =====
+var totalScore = 0;
+var cardOrder = [];
+var cardIndex = 0;
+var cardFlipped = false;
+var cardStatus = [];
+var randomCards = false;
+var quizMode = 'normal';
+var quizQueue = [];
+var quizIndex = 0;
+var quizScore = 0;
+var quizAnswered = false;
+var quizErrors = [];
+var quizStreak = 0;
+var quizBestStreak = 0;
+var timerInterval = null;
+var lacIndex = 0;
+var lacScore = 0;
+var lacAnswered = false;
+var LS_KEY = 'hist6e_ch1_v2';
+
+function saveState() { try { localStorage.setItem(LS_KEY, JSON.stringify({totalScore:totalScore,quizScore:quizScore,quizErrors:quizErrors,cardStatus:cardStatus,bestStreak:quizBestStreak})); } catch(e) {} }
+function loadState() {
+  try {
+    var d = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if (!d) return;
+    if (d.totalScore) totalScore = d.totalScore;
+    if (d.quizScore) quizScore = d.quizScore;
+    if (d.quizErrors) quizErrors = d.quizErrors;
+    if (d.cardStatus && d.cardStatus.length === flashcards.length) cardStatus = d.cardStatus;
+    if (d.bestStreak) quizBestStreak = d.bestStreak;
+    updateScoreDisplay();
+  } catch(e) {}
+}
+
+function addScore(pts) { totalScore += pts; updateScoreDisplay(); saveState(); }
+function updateScoreDisplay() {
+  document.getElementById('score-val').textContent = totalScore;
+  var pct = Math.min(100, Math.round((quizScore / (quizData.length * 2)) * 100));
+  var el = document.getElementById('prog-ch1'); if (el) el.style.width = pct + '%';
+  var apct = Math.min(100, Math.round((totalScore / 200) * 100));
+  var fill = document.getElementById('home-xp-fill'); if (fill) fill.style.width = apct + '%';
+  var lbl = document.getElementById('home-xp-pct'); if (lbl) lbl.textContent = apct + '%';
+}
+
+function openChapter(n) { document.getElementById('screen-home').classList.remove('active'); document.getElementById('screen-ch'+n).classList.add('active'); if(n===1) switchTab('cours'); }
+function goHome() { stopTimer(); document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');}); document.getElementById('screen-home').classList.add('active'); updateScoreDisplay(); }
+function switchTab(tab) {
+  ['cours','frise','cartes','quiz','lacunes','paliers'].forEach(function(t) {
+    var b=document.getElementById('tab-'+t); var p=document.getElementById('panel-'+t);
+    if(b) b.classList.toggle('active', t===tab);
+    if(p) p.style.display = (t===tab)?'block':'none';
+  });
+  if(tab==='frise') initFrise();
+  if(tab==='cartes') initCards();
+  if(tab==='quiz') { stopTimer(); showQuizModeSelect(); }
+  if(tab==='lacunes') initLacunes();
+  if(tab==='paliers') renderBadges();
+}
+function toggleSection(h) { h.classList.toggle('open'); }
+
+// FRISE
+function initFrise() {
+  var c = document.getElementById('frise-container');
+  if (c.querySelectorAll('.frise-event').length > 0) return;
+  friseData.forEach(function(ev, i) {
+    var d = document.createElement('div'); d.className = 'frise-event';
+    d.innerHTML = '<div class="frise-dot" style="color:'+ev.color+';background:'+ev.color+';"></div><div class="frise-date">'+ev.label+'</div>';
+    d.onclick = (function(idx){return function(){showFriseDetail(idx);};})(i);
+    c.appendChild(d);
+  });
+}
+function showFriseDetail(idx) {
+  var ev = friseData[idx]; var d = document.getElementById('frise-detail');
+  d.className = 'frise-popup show';
+  d.innerHTML = '<h4>'+ev.date+' &mdash; '+ev.event+'</h4><p style="font-size:12px;color:var(--slate-mid);line-height:1.5;">'+ev.detail+'</p>';
+}
+
+// CARTES
+function initCards() { if(cardStatus.length!==flashcards.length) cardStatus=flashcards.map(function(){return 0;}); buildCardOrder(); cardIndex=0; cardFlipped=false; renderCard(); }
+function buildCardOrder() { var r=[],u=[],k=[]; flashcards.forEach(function(_,i){if(cardStatus[i]===2)r.push(i);else if(cardStatus[i]===0)u.push(i);else k.push(i);}); cardOrder=r.concat(u).concat(k); if(randomCards) cardOrder=cardOrder.sort(function(){return Math.random()-0.5;}); }
+function toggleRandomCards() { randomCards=document.getElementById('chk-random').checked; buildCardOrder(); cardIndex=0; cardFlipped=false; renderCard(); }
+function renderCard() {
+  var ri=cardOrder[cardIndex]; var fc=flashcards[ri];
+  document.getElementById('card-counter').textContent=(cardIndex+1)+' / '+cardOrder.length;
+  var dots=document.getElementById('flip-dots'); dots.innerHTML='';
+  cardOrder.forEach(function(r,i){var d=document.createElement('div');d.className='flip-dot'+(i===cardIndex?' active':cardStatus[r]===1?' known':cardStatus[r]===2?' review':'');dots.appendChild(d);});
+  var content=document.getElementById('card-content'); var label=document.getElementById('card-side-label'); var card=document.getElementById('flashcard'); var ev=document.getElementById('card-eval');
+  if(!cardFlipped){label.textContent='Terme';content.className='card-front-text';content.textContent=fc.term;card.style.background='white';ev.classList.remove('show');document.getElementById('card-hint').style.display='block';}
+  else{label.textContent='Definition';content.className='card-back-text';content.textContent=fc.def;card.style.background='#EFF6FF';ev.classList.add('show');document.getElementById('card-hint').style.display='none';}
+  var toR=cardStatus.filter(function(s){return s===2;}).length; var kn=cardStatus.filter(function(s){return s===1;}).length;
+  var li=document.getElementById('leitner-info'); if(toR>0)li.innerHTML='<span>'+toR+' a revoir</span> &bull; '+kn+' acquises'; else li.textContent=kn+' / '+flashcards.length+' acquises';
+}
+function flipCard(){cardFlipped=!cardFlipped;renderCard();}
+function nextCard(){cardIndex=(cardIndex+1)%cardOrder.length;cardFlipped=false;renderCard();}
+function prevCard(){cardIndex=(cardIndex-1+cardOrder.length)%cardOrder.length;cardFlipped=false;renderCard();}
+function rateCard(knew){cardStatus[cardOrder[cardIndex]]=knew?1:2;saveState();nextCard();}
+
+// QUIZ
+function setQuizMode(mode) {
+  quizMode=mode; document.querySelectorAll('.quiz-mode-btn').forEach(function(b){b.classList.remove('active');}); document.getElementById('mode-'+mode).classList.add('active');
+  var btn=document.querySelector('.btn-primary[onclick="startQuiz()"]');
+  if(mode==='erreurs'){document.getElementById('mode-erreurs').innerHTML='&#10060;<br>Erreurs<br><small>'+quizErrors.length+'</small>';if(btn){btn.disabled=quizErrors.length===0;btn.textContent=quizErrors.length===0?'Aucune erreur !':'Lancer \u25B6';}}
+  else{if(btn){btn.disabled=false;btn.textContent='Lancer \u25B6';}}
+}
+function showQuizModeSelect(){document.getElementById('quiz-mode-select').style.display='block';document.getElementById('quiz-play').style.display='none';setQuizMode(quizMode);}
+function startQuiz() {
+  stopTimer();
+  if(quizMode==='erreurs'){if(quizErrors.length===0)return;quizQueue=quizErrors.map(function(i){return quizData[i];});}
+  else if(quizMode==='vf'){startVF();return;}
+  else{quizQueue=quizData.slice().sort(function(){return Math.random()-0.5;});}
+  quizIndex=0;quizScore=0;quizAnswered=false;quizStreak=0;window._sessionErrors=[];
+  document.getElementById('quiz-mode-select').style.display='none';document.getElementById('quiz-play').style.display='block';
+  document.getElementById('quiz-main').style.display='block';document.getElementById('quiz-end-screen').style.display='none';
+  document.getElementById('vf-zone').style.display='none';document.getElementById('quiz-opts').style.display='block';
+  renderQuestion();
+}
+function renderQuestion() {
+  stopTimer(); var q=quizQueue[quizIndex];
+  document.getElementById('q-counter').textContent='Question '+(quizIndex+1)+' / '+quizQueue.length;
+  document.getElementById('q-score-mini').textContent=quizScore+' pts';
+  document.getElementById('q-progress').style.width=Math.round((quizIndex/quizQueue.length)*100)+'%';
+  document.getElementById('quiz-q-text').textContent=q.q;
+  var indices=q.opts.map(function(_,i){return i;}).sort(function(){return Math.random()-0.5;});
+  var opts=document.getElementById('quiz-opts');opts.innerHTML='';
+  indices.forEach(function(oi){var btn=document.createElement('button');btn.className='opt-btn';btn.textContent=q.opts[oi];btn.onclick=(function(o,b){return function(){answerQuiz(o,b,q);};})(oi,btn);opts.appendChild(btn);});
+  var fb=document.getElementById('quiz-feedback');fb.className='feedback';fb.textContent='';
+  document.getElementById('quiz-next-btn').style.display='none';
+  document.getElementById('streak-pill').className='streak-pill'+(quizStreak>=2?' show':'');
+  document.getElementById('streak-val').textContent=quizStreak;
+  quizAnswered=false; if(quizMode==='brevet') startTimer(q);
+}
+function startTimer(q){timerSec=30;var svg=document.getElementById('timer-svg');var arc=document.getElementById('timer-arc');var txt=document.getElementById('timer-txt');svg.style.display='block';updateTimerArc(30,30,arc,txt);timerInterval=setInterval(function(){timerSec--;updateTimerArc(timerSec,30,arc,txt);if(timerSec<=0){stopTimer();forceWrongAnswer(q);}},1000);}
+function updateTimerArc(r,t,arc,txt){arc.style.strokeDashoffset=100-(r/t*100);arc.style.stroke=r<=10?'#EF4444':'#3B82F6';txt.textContent=r;}
+function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}var svg=document.getElementById('timer-svg');if(svg)svg.style.display='none';}
+function forceWrongAnswer(q){if(quizAnswered)return;quizAnswered=true;document.querySelectorAll('.opt-btn').forEach(function(b){b.disabled=true;if(b.textContent===q.opts[q.a])b.classList.add('correct');});var fb=document.getElementById('quiz-feedback');fb.textContent='\u23F0 Temps ecoule ! '+q.expl;fb.className='feedback ko';quizStreak=0;recordError(q);document.getElementById('quiz-next-btn').style.display='block';}
+function answerQuiz(selected,btn,q) {
+  if(quizAnswered)return;quizAnswered=true;stopTimer();
+  document.querySelectorAll('.opt-btn').forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('quiz-feedback');
+  if(selected===q.a){btn.classList.add('correct');var bonus=quizStreak>=2?1:0;var pts=2+bonus;fb.textContent='\u2705 Bonne reponse !'+(bonus?' +'+pts+' pts (bonus serie !) ':' ')+q.expl;fb.className='feedback ok';quizScore+=pts;quizStreak++;if(quizStreak>quizBestStreak)quizBestStreak=quizStreak;addScore(10);if(quizStreak>=2){document.getElementById('streak-pill').className='streak-pill show';document.getElementById('streak-val').textContent=quizStreak;}}
+  else{btn.classList.add('wrong');document.querySelectorAll('.opt-btn').forEach(function(b){if(b.textContent===q.opts[q.a])b.classList.add('correct');});fb.textContent='\u274C Dommage. '+q.expl;fb.className='feedback ko';quizStreak=0;recordError(q);}
+  document.getElementById('q-score-mini').textContent=quizScore+' pts';document.getElementById('quiz-next-btn').style.display='block';saveState();
+}
+function recordError(q){var i=quizData.indexOf(q);if(i>=0&&quizErrors.indexOf(i)<0)quizErrors.push(i);if(!window._sessionErrors)window._sessionErrors=[];var si=quizQueue.indexOf(q);if(si>=0&&window._sessionErrors.indexOf(si)<0)window._sessionErrors.push(si);}
+function nextQuestion(){document.getElementById('quiz-next-btn').style.display='none';quizIndex++;if(quizIndex<quizQueue.length){renderQuestion();}else{showQuizEnd();}}
+function showQuizEnd() {
+  stopTimer();document.getElementById('quiz-main').style.display='none';
+  var correct=Math.floor(quizScore/2);var pct=Math.round((correct/quizQueue.length)*100);
+  var emoji=pct>=80?'\u{1F3C6}':pct>=60?'\u2B50':'\u{1F4DA}';
+  var msg=pct>=80?'Excellent ! Tu maitrises le chapitre !':pct>=60?'Bon travail ! Relis quelques fiches.':'Continue a reviser ! Relis le cours.';
+  var errHtml='';
+  if(window._sessionErrors&&window._sessionErrors.length>0){errHtml='<div class="errors-list"><h4>&#10060; A retravailler ('+window._sessionErrors.length+')</h4>';window._sessionErrors.forEach(function(i){var q=quizQueue[i];errHtml+='<div class="error-item"><strong>'+q.q+'</strong>Reponse : '+q.opts[q.a]+'</div>';});errHtml+='</div>';}
+  var streakHtml=quizBestStreak>=3?'<p style="font-size:12px;color:var(--amber);font-weight:700;margin-bottom:12px;">&#128293; Meilleure serie : '+quizBestStreak+' bonnes reponses d\'affilee !</p>':'';
+  var end=document.getElementById('quiz-end-screen');end.style.display='block';
+  end.innerHTML='<div class="quiz-end"><div class="big-icon">'+emoji+'</div><h3>Quiz termine !</h3><p>'+msg+'</p>'+streakHtml+'<div class="score-display">'+correct+' / '+quizQueue.length+'<span>'+pct+'% de bonnes reponses</span></div>'+errHtml+'<button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="restartQuiz()">Recommencer</button>'+(quizErrors.length>0?'<button class="btn btn-amber" style="width:100%;margin-bottom:8px;" onclick="replayErrors()">&#10060; Revoir mes '+quizErrors.length+' erreurs</button>':'')+'<button class="btn btn-blue" style="width:100%;" onclick="switchTab(\'paliers\')">Voir mes badges &#127942;</button></div>';
+  saveState();
+}
+function restartQuiz(){quizIndex=0;quizScore=0;quizAnswered=false;quizStreak=0;window._sessionErrors=[];quizQueue=quizData.slice().sort(function(){return Math.random()-0.5;});document.getElementById('quiz-main').style.display='block';document.getElementById('quiz-end-screen').style.display='none';document.getElementById('quiz-next-btn').style.display='none';renderQuestion();}
+function replayErrors(){quizMode='erreurs';document.getElementById('quiz-end-screen').style.display='none';document.getElementById('quiz-play').style.display='none';document.getElementById('quiz-mode-select').style.display='block';setQuizMode('erreurs');}
+
+// VF
+function startVF() {
+  window._vfQueue=vfData.slice().sort(function(){return Math.random()-0.5;});var vi=0;var vs=0;
+  document.getElementById('quiz-mode-select').style.display='none';document.getElementById('quiz-play').style.display='block';
+  document.getElementById('quiz-main').style.display='block';document.getElementById('quiz-end-screen').style.display='none';
+  document.getElementById('quiz-opts').style.display='none';document.getElementById('vf-zone').style.display='block';
+  function renderVF(){
+    var q=window._vfQueue[vi];
+    document.getElementById('q-counter').textContent='Vrai/Faux '+(vi+1)+' / '+window._vfQueue.length;
+    document.getElementById('q-score-mini').textContent=vs+' pts';
+    document.getElementById('q-progress').style.width=Math.round((vi/window._vfQueue.length)*100)+'%';
+    document.getElementById('quiz-q-text').textContent=q.q;
+    ['vf-true','vf-false'].forEach(function(id){var b=document.getElementById(id);b.className='vf-btn';b.disabled=false;});
+    var fb=document.getElementById('quiz-feedback');fb.className='feedback';fb.textContent='';
+    document.getElementById('quiz-next-btn').style.display='none';
+  }
+  window.answerVF=function(answer){
+    var q=window._vfQueue[vi];
+    document.getElementById('vf-true').disabled=true;document.getElementById('vf-false').disabled=true;
+    var fb=document.getElementById('quiz-feedback');
+    if(answer===q.ans){document.getElementById(answer?'vf-true':'vf-false').classList.add('correct');fb.textContent='\u2705 Correct ! '+q.expl;fb.className='feedback ok';vs+=2;addScore(10);}
+    else{document.getElementById(answer?'vf-true':'vf-false').classList.add('wrong');document.getElementById(q.ans?'vf-true':'vf-false').classList.add('correct');fb.textContent='\u274C Faux. '+q.expl;fb.className='feedback ko';}
+    document.getElementById('q-score-mini').textContent=vs+' pts';
+    var nb=document.getElementById('quiz-next-btn');nb.style.display='block';
+    nb.onclick=function(){vi++;if(vi<window._vfQueue.length){renderVF();}else{var pct=Math.round((vs/(window._vfQueue.length*2))*100);var emoji=pct>=80?'\u{1F3C6}':pct>=60?'\u2B50':'\u{1F4DA}';document.getElementById('quiz-main').style.display='none';var end=document.getElementById('quiz-end-screen');end.style.display='block';end.innerHTML='<div class="quiz-end"><div class="big-icon">'+emoji+'</div><h3>Vrai/Faux termine !</h3><div class="score-display">'+(vs/2)+' / '+window._vfQueue.length+'<span>'+pct+'%</span></div><button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="startVF()">Recommencer</button><button class="btn btn-blue" style="width:100%;" onclick="showQuizModeSelect()">Changer de mode</button></div>';}};
+  };
+  renderVF();
+}
+
+// LACUNES
+function initLacunes(){lacIndex=0;lacScore=0;lacAnswered=false;document.getElementById('lacune-main').style.display='block';document.getElementById('lacune-end').style.display='none';renderLacune();}
+function renderLacune(){
+  var q=lacunesData[lacIndex];
+  document.getElementById('lac-counter').textContent='Exercice '+(lacIndex+1)+' / '+lacunesData.length;
+  document.getElementById('lac-score').textContent=lacScore+' pts';
+  document.getElementById('lac-progress').style.width=Math.round((lacIndex/lacunesData.length)*100)+'%';
+  document.getElementById('lac-q').textContent=q.q;
+  document.getElementById('lac-input').value='';document.getElementById('lac-input').disabled=false;
+  document.getElementById('lac-result').className='lacune-result';document.getElementById('lac-result').textContent='';
+  document.getElementById('lac-check-btn').style.display='block';document.getElementById('lac-next-btn').style.display='none';
+  lacAnswered=false;setTimeout(function(){document.getElementById('lac-input').focus();},100);
+}
+function checkLacune(){
+  if(lacAnswered)return;lacAnswered=true;
+  var q=lacunesData[lacIndex];var val=document.getElementById('lac-input').value.trim().toLowerCase();
+  var ok=val===q.ans.toLowerCase()||(q.ans.toLowerCase().indexOf(val)>=0&&val.length>=4);
+  document.getElementById('lac-input').disabled=true;
+  var res=document.getElementById('lac-result');
+  if(ok){res.className='lacune-result ok';res.textContent='\u2705 Bonne reponse ! '+q.display+'. '+q.expl;lacScore+=2;addScore(8);}
+  else{res.className='lacune-result ko';res.textContent='\u274C La reponse : '+q.display+'. '+q.expl;}
+  document.getElementById('lac-score').textContent=lacScore+' pts';
+  document.getElementById('lac-check-btn').style.display='none';document.getElementById('lac-next-btn').style.display='block';
+}
+function nextLacune(){
+  lacIndex++;if(lacIndex<lacunesData.length){renderLacune();}
+  else{var pct=Math.round((lacScore/(lacunesData.length*2))*100);var emoji=pct>=80?'\u{1F3C6}':pct>=60?'\u2B50':'\u{1F4DA}';document.getElementById('lacune-main').style.display='none';var end=document.getElementById('lacune-end');end.style.display='block';end.innerHTML='<div class="quiz-end"><div class="big-icon">'+emoji+'</div><h3>Exercice termine !</h3><div class="score-display">'+(lacScore/2)+' / '+lacunesData.length+'<span>'+pct+'%</span></div><button class="btn btn-primary" style="width:100%;" onclick="initLacunes()">Recommencer</button></div>';}
+}
+document.addEventListener('keydown',function(e){var inp=document.getElementById('lac-input');if(inp&&document.activeElement===inp&&e.key==='Enter'){if(!lacAnswered)checkLacune();else nextLacune();}});
+
+// BADGES
+function renderBadges(){
+  var grid=document.getElementById('badges-grid');grid.innerHTML='';
+  var correct=Math.floor(quizScore/2);
+  badgesConfig.forEach(function(b){
+    var e=correct>=b.min;var div=document.createElement('div');div.className='badge-card '+(e?'unlocked':'locked-b');div.style.background=b.color;div.style.borderColor=b.border;
+    div.innerHTML='<div class="badge-icon">'+(e?b.icon:'&#128274;')+'</div><div class="badge-name" style="color:'+b.text+'">'+b.name+'</div><div class="badge-desc">'+b.desc+'</div>'+(e?'<div style="font-size:10px;color:'+b.text+';font-weight:700;margin-top:6px;">\u2713 Obtenu</div>':'');
+    grid.appendChild(div);
+  });
+  var cb=document.getElementById('cert-btn');if(cb)cb.disabled=correct<14;
+}
+
+// CERTIFICAT
+function printCert(){
+  var correct=Math.floor(quizScore/2);var pct=Math.round((correct/quizData.length)*100);var ds=new Date().toLocaleDateString('fr-FR');
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Certificat</title><style>body{font-family:Georgia,serif;margin:40px;text-align:center;color:#1E293B;}h1{color:#1E3A8A;font-size:28px;}h2{font-size:16px;color:#475569;font-weight:normal;margin-bottom:32px;}.score{font-size:72px;font-weight:900;color:#1E3A8A;}.border{border:4px double #1E3A8A;padding:40px;border-radius:12px;}</style></head><body><div class="border"><div style="font-size:48px;">&#127942;</div><h1>Certificat de Reussite</h1><h2>Ch. 1 &mdash; Les debuts de l\'humanite<br>Histoire 6e</h2><div class="score">'+pct+'%</div><p>'+correct+' / '+quizData.length+' bonnes reponses</p><p style="color:#94A3B8;font-size:13px;">Obtenu le '+ds+'</p></div><script>window.print();<\/script></body></html>');
+  w.document.close();
+}
+
+// INIT
+loadState(); switchTab('cours');
+</script>
+</body>
+</html>
